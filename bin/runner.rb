@@ -1,3 +1,8 @@
-require_relative '../config/environment.rb'
+require 'bundler'
+Bundler.require
 
-CsvReader.new.call
+$LOAD_PATH << File.join(File.dirname(__FILE__), '..', 'lib')
+
+require 'csv_reader'
+
+CsvReader.new.csv_read

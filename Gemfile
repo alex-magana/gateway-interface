@@ -1,6 +1,8 @@
 # A sample Gemfile
 source 'https://rubygems.org'
 
-gem 'rspec'
-gem 'require_all'
-gem 'pry'
+group :development, :test do
+  gem 'rspec'
+  gem 'pry'
+  gem 'rb-readline'
+end
