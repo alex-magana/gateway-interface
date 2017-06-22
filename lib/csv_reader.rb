@@ -2,11 +2,12 @@ require 'csv'
 require 'json'
 require 'net/http'
 require 'uri'
+require 'yaml'
 
 class CsvReader
   def initialize(path = 'assets')
     @path = File.join(File.dirname(__FILE__), '..', path)
-    @gateway_uri = '' # read from config
+    @gateway_uri = config['gateway']['uri']
   end
 
   def csv_read
@@ -15,6 +16,11 @@ class CsvReader
       assets_by_file.push(build_payload(file_name))
     end
     submit_assets(assets_by_file)
+  end
+
+  def config
+    config_path = File.join(File.dirname(__FILE__), '..', 'config/config.yaml')
+    YAML.safe_load(File.open(config_path))
   end
 
   def file_names
@@ -44,8 +50,8 @@ class CsvReader
   end
 
   def submit_assets(assets_by_file)
-    uri = URI.parse(@gateway_uri)
-    header = { 'Content-Type' => 'text/json' }
+    uri = URI.parse("http://#{@gateway_uri}")
+    header = { 'Content-Type' => 'application/json' }
     assets = { :assets => assets_by_file }
     send_request(uri, header, assets)
   end
