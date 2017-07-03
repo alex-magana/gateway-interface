@@ -50,7 +50,7 @@ class CsvReader
   end
 
   def submit_assets(assets_by_file)
-    uri = URI.parse("http://#{@gateway_uri}")
+    uri = URI.parse(@gateway_uri)
     header = { 'Content-Type' => 'application/json' }
     assets = { :assets => assets_by_file }
     send_request(uri, header, assets)

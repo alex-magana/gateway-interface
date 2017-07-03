@@ -1,2 +1,2 @@
 gateway:
-  uri: 'mockbin.org/bin/d7cc9194-b27e-4d4d-aad3-e664d745f453?foo=bar&foo=baz'
+  uri: 'https://mockbin.org/bin/d7cc9194-b27e-4d4d-aad3-e664d745f453?foo=bar&foo=baz'
