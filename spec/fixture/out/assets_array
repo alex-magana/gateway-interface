@@ -1,0 +1,4 @@
+[["asset_uri", "asset_type", "event_type"],
+ ["/zhongwen/simp/40198087", "STY", "publish"],
+ ["/zhongwen/simp/40198087", "CSP", "withdraw"],
+ ["/ukchina/simp/vert-tra-40262311", "STY", "withdraw"]]
