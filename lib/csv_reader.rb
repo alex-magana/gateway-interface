@@ -5,17 +5,9 @@ require 'uri'
 require 'yaml'
 
 class CsvReader
-  def initialize(path = 'assets')
+  def initialize(path = 'assets', env = 'live')
     @path = File.join(File.dirname(__FILE__), '..', path)
-    @gateway_uri = config['gateway']['uri']
-  end
-
-  def csv_read
-    assets_by_file = []
-    file_names.each do |file_name|
-      assets_by_file.push(build_payload(file_name))
-    end
-    submit_assets(assets_by_file)
+    @gateway_uri = config[env]['gateway']['uri']
   end
 
   def config
@@ -23,25 +15,34 @@ class CsvReader
     YAML.safe_load(File.open(config_path))
   end
 
+  def process_csv
+    assets_by_file = []
+    file_names.each do |file_name|
+      assets_by_file.push(retrieve_asset_details(file_name))
+    end
+
+    process_assets_by_file(assets_by_file)
+  end
+
   def file_names
     Dir.chdir(@path) { Dir.glob('*.csv') }
   end
 
-  def build_payload(file_name)
-    payload = []
-    assets(file_name).each do |asset|
-      payload_details = {}
-      payload_details[:asset_uri] = asset['asset_uri']
-      payload_details[:site_name] = site_name(asset['asset_uri'])
-      payload_details[:asset_type] = asset['asset_type']
-      payload_details[:event_type] = asset['event_type']
-      payload.push(payload_details)
+  def retrieve_asset_details(file_name)
+    assets = []
+    read_file(file_name).each do |row|
+      asset = {}
+      asset[:asset_uri] = row['asset_uri']
+      asset[:site_name] = site_name(row['asset_uri'])
+      asset[:asset_type] = (row['asset_type']).upcase
+      asset[:event_type] = (row['event_type']).upcase
+      assets.push(asset)
     end
 
-    payload
+    assets
   end
 
-  def assets(file_name)
+  def read_file(file_name)
     CSV.read("#{@path}/#{file_name}", headers: true)
   end
 
@@ -49,18 +50,23 @@ class CsvReader
     asset_uri[0, asset_uri.rindex('/')]
   end
 
-  def submit_assets(assets_by_file)
-    uri = URI.parse(@gateway_uri)
-    header = { 'Content-Type' => 'application/json' }
-    assets = { :assets => assets_by_file }
-    send_request(uri, header, assets)
+  def process_assets_by_file(assets_by_file)
+    assets_by_file.each { |asset_file| submit_asset_details(asset_file) }
   end
 
-  def send_request(uri, header, payload)
-    http = Net::HTTP.new(uri.host, uri.port)
-    request = Net::HTTP::Post.new(uri.request_uri, header)
-    request.body = payload.to_json
+  def submit_asset_details(asset_file)
+    asset_file.each { |asset| make_request(asset) }
+  end
 
-    http.request(request)
+  def make_request(asset)
+    url = URI.parse("#{@gateway_uri}?asset_uri=#{asset[:asset_uri]}&site_name=#{asset[:site_name]}&asset_type=#{asset[:asset_type]}&event_type=#{asset[:event_type]}")
+    req = Net::HTTP::Post.new(url.path)
+    res = Net::HTTP.new(url.host, url.port).start { |http| http.request(req) }
+    case res
+    when Net::HTTPSuccess, Net::HTTPRedirection
+      puts "Asset #{asset[:asset_uri]} Event = #{asset[:event_type]} Code = #{res.code} Message = #{res.message}"
+    else
+      puts res.error!
+    end
   end
 end

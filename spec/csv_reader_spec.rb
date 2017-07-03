@@ -6,8 +6,12 @@ require 'csv_reader'
 RSpec.describe CsvReader do
   base_spec_fixture_path = File.join(File.dirname(__FILE__), '/fixture')
 
-  let(:payload) do
-    JSON.parse(File.read(base_spec_fixture_path + '/out/payload.json',
+  let(:assets_by_file) do
+    JSON.parse(File.read(base_spec_fixture_path + '/out/assets_by_file.json',
+                         encoding: 'UTF-8'))
+  end
+  let(:assets) do
+    JSON.parse(File.read(base_spec_fixture_path + '/out/assets.json',
                          encoding: 'UTF-8'))
   end
   let(:assets_array) do
@@ -15,23 +19,18 @@ RSpec.describe CsvReader do
                          encoding: 'UTF-8'))
   end
   let(:published_assets_path) { 'spec/fixture/in' }
-  let(:payload_path) { 'spec/fixture/out' }
+  let(:assets_path) { 'spec/fixture/out' }
 
-  gateway_response = {
-    'results' => {
-      'assets_status' => 'published'
-    }
-  }
+  subject { described_class.new(published_assets_path, 'test') }
 
-  subject { described_class.new(published_assets_path) }
 
-  before(:each) do
-    allow(subject).to receive(:send_request).and_return(gateway_response)
-  end
+  describe '#process_csv' do
+    before do
+      allow(subject).to receive(:process_csv).and_return(assets_by_file)
+    end
 
-  describe '#csv_read' do
     it 'indicates the status of the re-publish' do
-      expect(subject.csv_read).to eq(gateway_response)
+      expect(subject.process_csv).to eq(assets_by_file)
     end
   end
 
@@ -41,20 +40,20 @@ RSpec.describe CsvReader do
     end
   end
 
-  describe '#build_payload' do
+  describe '#retrieve_asset_details' do
     it 'returns an array of assets' do
-      payload_with_symbolized_keys = payload.map { |asset| symbolize_keys(asset) }
-      expect(subject.build_payload('assets_report.csv')).to eq(payload_with_symbolized_keys)
+      assets_with_symbolized_keys = assets.map { |asset| symbolize_keys(asset) }
+      expect(subject.retrieve_asset_details('assets_report.csv')).to eq(assets_with_symbolized_keys)
     end
   end
 
-  describe '#assets' do
+  describe '#read_file' do
     it 'returns a csv table containing asset details' do
-      expect(subject.assets('assets_report.csv').class).to eq(CSV::Table)
+      expect(subject.read_file('assets_report.csv').class).to eq(CSV::Table)
     end
 
     it 'returns an array of arrays' do
-      expect(subject.assets('assets_report.csv').to_a).to eq(assets_array)
+      expect(subject.read_file('assets_report.csv').to_a).to eq(assets_array)
     end
   end
 
@@ -71,22 +70,22 @@ RSpec.describe CsvReader do
     end
   end
 
-  describe '#submit_assets' do
+  describe '#process_assets_by_file' do
     it 'returns the status of asset publish/withdraw' do
-      assets_by_file = [payload]
+      assets_by_file = [assets]
 
-      expect(subject.submit_assets(assets_by_file)).to eq(gateway_response)
+      expect(subject.process_assets_by_file(assets_by_file)).to eq(assets_by_file)
     end
   end
 
-  describe '#send_request' do
+  describe '#make_request' do
+    before do
+      allow(subject).to receive(:make_request).and_return(assets_by_file[0][0])
+    end
 
     it 'returns a response given a valid uri' do
-      uri = 'https://mockbin.org/bin/d7cc9194-b27e-4d4d-aad3-e664d745f453?foo=bar&foo=baz'
-      header = { 'Content-Type' => 'application/json' }
-      assets = { :assets => [payload] }
 
-      expect(subject.send_request(uri, header, assets)).to eq(gateway_response)
+      expect(subject.make_request(assets[0])).to eq(assets_by_file[0][0])
     end
   end
 end

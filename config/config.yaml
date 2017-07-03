@@ -1,2 +1,9 @@
-gateway:
-  uri: 'https://mockbin.org/bin/d7cc9194-b27e-4d4d-aad3-e664d745f453?foo=bar&foo=baz'
+int:
+  gateway:
+    uri: 'https://mockbin.org/bin/d7cc9194-b27e-4d4d-aad3-e664d745f453?foo=bar&foo=baz'
+test:
+  gateway:
+    uri: 'https://mockbin.org/bin/d7cc9194-b27e-4d4d-aad3-e664d745f453?foo=bar&foo=baz'
+live:
+  gateway:
+    uri: 'http://v7k6zqb62f.execute-api.eu-west-1.amazonaws.com/prod/int-ws-alephamp-lambda-message-cons-LambdaFunction-S6CFSNQUPF8C'

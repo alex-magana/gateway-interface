@@ -1,0 +1,28 @@
+[
+  [
+    {
+      "asset_uri": "/zhongwen/simp/40198087",
+      "site_name": "/zhongwen/simp",
+      "asset_type": "STY",
+      "event_type": "PUBLISH",
+      "response_code": "200",
+      "response_message": "OK"
+    },
+    {
+      "asset_uri": "/zhongwen/simp/40198087",
+      "site_name": "/zhongwen/simp",
+      "asset_type": "CSP",
+      "event_type": "WITHDRAW",
+      "response_code": "200",
+      "response_message": "OK"
+    },
+    {
+      "asset_uri": "/ukchina/simp/vert-tra-40262311",
+      "site_name": "/ukchina/simp",
+      "asset_type": "STY",
+      "event_type": "WITHDRAW",
+      "response_code": "200",
+      "response_message": "OK"
+    }
+  ]
+]

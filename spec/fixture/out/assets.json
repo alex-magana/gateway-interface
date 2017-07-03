@@ -3,18 +3,18 @@
     "asset_uri": "/zhongwen/simp/40198087",
     "site_name": "/zhongwen/simp",
     "asset_type": "STY",
-    "event_type": "publish"
+    "event_type": "PUBLISH"
   },
   {
     "asset_uri": "/zhongwen/simp/40198087",
     "site_name": "/zhongwen/simp",
     "asset_type": "CSP",
-    "event_type": "withdraw"
+    "event_type": "WITHDRAW"
   },
   {
     "asset_uri": "/ukchina/simp/vert-tra-40262311",
     "site_name": "/ukchina/simp",
     "asset_type": "STY",
-    "event_type": "withdraw"
+    "event_type": "WITHDRAW"
   }
 ]

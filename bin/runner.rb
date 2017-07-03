@@ -5,4 +5,4 @@ $LOAD_PATH << File.join(File.dirname(__FILE__), '..', 'lib')
 
 require 'csv_reader'
 
-CsvReader.new.csv_read
+CsvReader.new.process_csv
