@@ -2,6 +2,7 @@ require 'csv'
 require 'json'
 require 'net/http'
 require 'uri'
+require 'openssl'
 require 'yaml'
 
 class CsvReader
@@ -59,14 +60,37 @@ class CsvReader
   end
 
   def make_request(asset)
-    url = URI.parse("#{@gateway_uri}?asset_uri=#{asset[:asset_uri]}&site_name=#{asset[:site_name]}&asset_type=#{asset[:asset_type]}&event_type=#{asset[:event_type]}")
-    req = Net::HTTP::Post.new(url.path)
-    res = Net::HTTP.new(url.host, url.port).start { |http| http.request(req) }
-    case res
-    when Net::HTTPSuccess, Net::HTTPRedirection
-      puts "Asset #{asset[:asset_uri]} Event = #{asset[:event_type]} Code = #{res.code} Message = #{res.message}"
+    fetch("#{@gateway_uri}?asset_uri=#{asset[:asset_uri]}&site_name=#{asset[:site_name]}&asset_type=#{asset[:asset_type]}&event_type=#{asset[:event_type]}")
+  end
+
+  def fetch(uri_str, limit = 10)
+    raise ArgumentError, 'too many HTTP redirects' if limit == 0
+
+    url = URI.parse(uri_str)
+
+    http = Net::HTTP.new(url.host, url.port)
+    http.use_ssl = true
+    http.verify_mode = OpenSSL::SSL::VERIFY_NONE
+
+    request = Net::HTTP::Post.new(url)
+    request["cache-control"] = 'no-cache'
+    request["postman-token"] = 'b2aa3a50-8578-24f0-3095-658664198236'
+    request["content-type"] = "application/json"
+
+    puts "Accessing: #{uri_str}\n"
+
+    response = http.request(request)
+    puts response.read_body
+
+    case response
+    when Net::HTTPSuccess then
+      response
+    when Net::HTTPRedirection then
+      location = response['location']
+      puts "Redirected to: #{location}\n"
+      fetch(location, limit - 1)
     else
-      puts res.error!
+      puts "#{response.code} #{response.value}"
     end
   end
 end
