@@ -78,14 +78,14 @@ RSpec.describe CsvReader do
     end
   end
 
-  describe '#make_request' do
+  describe '#submit_asset_details' do
     before do
-      allow(subject).to receive(:make_request).and_return(assets_by_file[0][0])
+      allow(subject).to receive(:submit_asset_details).and_return(assets_by_file[0][0])
     end
 
     it 'returns a response given a valid uri' do
 
-      expect(subject.make_request(assets[0])).to eq(assets_by_file[0][0])
+      expect(subject.submit_asset_details(assets[0])).to eq(assets_by_file[0][0])
     end
   end
 end
