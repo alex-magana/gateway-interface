@@ -1,11 +1,18 @@
-require 'csv'
-require 'json'
 require 'net/http'
 require 'uri'
 require 'openssl'
+require 'csv'
+require 'json'
 require 'yaml'
+require 'logger'
 
 class CsvReader
+  @@logger = Logger.new(
+    File.join(File.dirname(__FILE__), '..', 'logs/log.txt').to_s,
+    10,
+    1048576
+  )
+
   def initialize(path = 'assets', env = 'live')
     @path = File.join(File.dirname(__FILE__), '..', path)
     @gateway_uri = config[env]['gateway']['uri']
@@ -56,15 +63,19 @@ class CsvReader
   end
 
   def submit_asset_details(asset_file)
-    asset_file.each { |asset| make_request(asset) }
+    asset_file.each do |asset|
+      puts "Processing #{asset[:asset_uri]} #{asset[:site_name]} #{asset[:asset_type]} #{asset[:event_type]}"
+      build_url(asset)
+    end
   end
 
-  def make_request(asset)
-    fetch("#{@gateway_uri}?asset_uri=#{asset[:asset_uri]}&site_name=#{asset[:site_name]}&asset_type=#{asset[:asset_type]}&event_type=#{asset[:event_type]}")
+  def build_url(asset)
+    url = "#{@gateway_uri}?asset_uri=#{asset[:asset_uri]}&site_name=#{asset[:site_name]}&asset_type=#{asset[:asset_type]}&event_type=#{asset[:event_type]}"
+    fetch(url)
   end
 
   def fetch(uri_str, limit = 10)
-    raise ArgumentError, 'too many HTTP redirects' if limit == 0
+    raise ArgumentError, 'too many HTTP redirects' if limit.zero?
 
     url = URI.parse(uri_str)
 
@@ -74,23 +85,23 @@ class CsvReader
 
     request = Net::HTTP::Post.new(url)
     request["cache-control"] = 'no-cache'
-    request["postman-token"] = 'b2aa3a50-8578-24f0-3095-658664198236'
-    request["content-type"] = "application/json"
+    request["content-type"] = 'application/json'
 
-    puts "Accessing: #{uri_str}\n"
+    @@logger.info("Accessing: #{uri_str}\n")
+    log_response(http.request(request))
+  end
 
-    response = http.request(request)
-    puts response.read_body
-
+  def log_response(response)
     case response
     when Net::HTTPSuccess then
+      @@logger.info("#{response.read_body}\n")
       response
     when Net::HTTPRedirection then
       location = response['location']
-      puts "Redirected to: #{location}\n"
+      @@logger.info("Redirected to: #{location}\n")
       fetch(location, limit - 1)
     else
-      puts "#{response.code} #{response.value}"
+      @@logger.error(response.flatten.join(' '))
     end
   end
 end
