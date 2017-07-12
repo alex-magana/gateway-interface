@@ -24,8 +24,7 @@ class CsvReader
     YAML.safe_load(File.open(config_path))
   end
 
-  def process_csv
-    asset_report_url = "https://raw.githubusercontent.com/andela-amagana/gateway-interface/master/assets/workbook.csv"
+  def process_csv(asset_report_url)
     fetch_asset_report(asset_report_url)
     assets_by_file = []
     file_names.each do |file_name|
