@@ -1,6 +1,7 @@
 require 'net/http'
 require 'uri'
 require 'openssl'
+require 'open-uri'
 require 'csv'
 require 'json'
 require 'yaml'
@@ -23,7 +24,8 @@ class CsvReader
     YAML.safe_load(File.open(config_path))
   end
 
-  def process_csv(asset_report_url)
+  def process_csv
+    asset_report_url = "https://raw.githubusercontent.com/andela-amagana/gateway-interface/master/assets/workbook.csv"
     fetch_asset_report(asset_report_url)
     assets_by_file = []
     file_names.each do |file_name|
@@ -93,11 +95,8 @@ class CsvReader
   end
 
   def fetch_asset_report(asset_report_url)
-    Net::HTTP.start(asset_report_url) do |http|
-      response = http.get(asset_report_url)
-      open("#{@path}/asset_report.csv", 'wb') do |file|
-        file.write(response.body)
-      end
+    File.open("#{@path}/asset_report.csv", "wb") do |file|
+      file.write open(asset_report_url).read
     end
   end
 
@@ -115,3 +114,5 @@ class CsvReader
     end
   end
 end
+
+CsvReader.new.process_csv
