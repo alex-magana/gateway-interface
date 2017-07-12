@@ -89,6 +89,7 @@ class CsvReader
     request["cache-control"] = 'no-cache'
     request["content-type"] = 'application/json'
 
+    puts "Accessing: #{uri_str}\n"
     @@logger.info("Accessing: #{uri_str}\n")
     log_response(http.request(request))
   end
@@ -102,13 +103,16 @@ class CsvReader
   def log_response(response)
     case response
     when Net::HTTPSuccess then
+      puts "#{response.read_body}\n"
       @@logger.info("#{response.read_body}\n")
       response
     when Net::HTTPRedirection then
       location = response['location']
+      puts "Redirected to: #{location}\n"
       @@logger.info("Redirected to: #{location}\n")
       fetch(location, limit - 1)
     else
+      puts response.flatten.join(' ').to_s
       @@logger.error(response.flatten.join(' '))
     end
   end
