@@ -23,7 +23,8 @@ class CsvReader
     YAML.safe_load(File.open(config_path))
   end
 
-  def process_csv
+  def process_csv(asset_report_url)
+    fetch_asset_report(asset_report_url)
     assets_by_file = []
     file_names.each do |file_name|
       assets_by_file.push(retrieve_asset_details(file_name))
@@ -89,6 +90,15 @@ class CsvReader
 
     @@logger.info("Accessing: #{uri_str}\n")
     log_response(http.request(request))
+  end
+
+  def fetch_asset_report(asset_report_url)
+    Net::HTTP.start(asset_report_url) do |http|
+      response = http.get(asset_report_url)
+      open("#{@path}/asset_report.csv", 'wb') do |file|
+        file.write(response.body)
+      end
+    end
   end
 
   def log_response(response)
