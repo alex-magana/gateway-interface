@@ -113,5 +113,3 @@ class CsvReader
     end
   end
 end
-
-CsvReader.new.process_csv
