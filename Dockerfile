@@ -14,3 +14,6 @@ RUN mkdir $APP_HOME
 WORKDIR $APP_HOME
 ADD . $APP_HOME
 RUN ls -al
+
+RUN gem install bundler --no-rdoc --no-ri
+RUN bundle install
