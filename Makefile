@@ -24,4 +24,4 @@ release: clean build
 
 release_interface:
 	docker build -t ws-lambda-message-constructor-api-interface .
-	docker run --rm=true -w /app ws-lambda-message-constructor-api-interface sh -l -c "chmod 755 bin/runner.rb && bundle exec ruby bin/runner.rb https://raw.githubusercontent.com/andela-amagana/gateway-interface/master/assets/workbook.csv"
+	docker run --rm=true -w /app ws-lambda-message-constructor-api-interface sh -l -c "gem install bundler --no-rdoc --no-ri && chmod 755 bin/runner.rb && bundle exec ruby bin/runner.rb https://raw.githubusercontent.com/andela-amagana/gateway-interface/master/assets/workbook.csv"
