@@ -1,12 +1,17 @@
-FROM ruby:2.3-alpine
+FROM alpine:3.2
 
-RUN apk update && apk upgrade
-RUN apk add ruby-dev build-base
-
+ENV BUILD_PACKAGES bash curl-dev ruby-dev build-base
+ENV RUBY_PACKAGES ruby ruby-io-console ruby-bundler
 ENV APP_HOME /app
+
+RUN apk update && \
+    apk upgrade && \
+    apk add $BUILD_PACKAGES && \
+    apk add $RUBY_PACKAGES && \
+    rm -rf /var/cache/apk/*
+
 RUN mkdir $APP_HOME
 WORKDIR $APP_HOME
 ADD . $APP_HOME
 
-RUN gem install bundler
 RUN bundle install
