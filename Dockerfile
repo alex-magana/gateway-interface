@@ -13,5 +13,4 @@ RUN apk update && \
 RUN mkdir $APP_HOME
 WORKDIR $APP_HOME
 ADD . $APP_HOME
-
-RUN bundle install
+RUN ls -al
